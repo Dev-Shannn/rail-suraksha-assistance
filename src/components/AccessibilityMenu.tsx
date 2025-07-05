@@ -53,7 +53,7 @@ const AccessibilityMenu: React.FC = () => {
       console.log('🎙️ Transcript:', transcript);
 
       if (transcript.includes('help') || transcript.includes('bachao')) {
-       window.location.href = '/safety'; // Redirect to safety dashboard
+       window.location.href = '/Safety'; // Redirect to safety dashboard
        
       }
     };

@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import SafetyDashboard from './pages/SafetyDashboard';
@@ -21,8 +21,8 @@ import RefundStatus from './pages/RefundStatus';
 import EmergencyContacts from './pages/EmergencyContacts';
 import DestinationGuide from './pages/DestinationGuide';
 import EmergencyPanic from './components/EmergencyPanic';
-import panic from './pages/panic'; // Import the panic page
-import Panic from './Panic';
+import NotFound from './pages/404';
+
 function App() {
   return (
     <Router>
@@ -48,6 +48,8 @@ function App() {
           <Route path="/refund" element={<RefundStatus />} />
           <Route path="/emergency" element={<EmergencyContacts />} />
           <Route path="/destination-guide" element={<DestinationGuide />} />
+          {/* Catch-all route for 404 */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
         <EmergencyPanic />
       </div>
