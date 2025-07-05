@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, useGLTF } from '@react-three/drei';
+import { OrbitControls } from '@react-three/drei';
+import CoachModel from '../components/CoachModel';
 import {
   Train,
   MapPin,
@@ -9,15 +10,7 @@ import {
   Signal
 } from 'lucide-react';
 
-// ✅ 3D Coach Model Viewer
-function CoachModel() {
-  const { scene } = useGLTF('/coach.glb'); // Must be in /public folder
-  return <primitive object={scene} scale={2.5} />;
-}
-useGLTF.preload('/coach.glb');
-
-// ✅ Main Component
-const CoachTracker = () => {
+const CoachTracker: React.FC = () => {
   const [trainNumber, setTrainNumber] = useState('');
   const [coachNumber, setCoachNumber] = useState('');
   const [isTracking, setIsTracking] = useState(false);
@@ -32,12 +25,11 @@ const CoachTracker = () => {
   useEffect(() => {
     if (isTracking) {
       const interval = setInterval(() => {
-        setLocation(prev => ({
+        setLocation((prev) => ({
           ...prev,
           speed: `${Math.floor(Math.random() * 40) + 60} km/h`
         }));
       }, 5000);
-
       return () => clearInterval(interval);
     }
   }, [isTracking]);
@@ -75,9 +67,9 @@ const CoachTracker = () => {
             </div>
 
             <button
-              onClick={() => trainNumber && coachNumber && setIsTracking(true)}
-              className="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition disabled:bg-gray-400"
+              onClick={() => setIsTracking(true)}
               disabled={!trainNumber || !coachNumber}
+              className="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition disabled:bg-gray-400"
             >
               <div className="flex items-center justify-center gap-2">
                 <Navigation className="h-5 w-5" />
@@ -121,7 +113,7 @@ const CoachTracker = () => {
             <div className="h-[400px] border rounded-lg overflow-hidden mb-6">
               <Canvas camera={{ position: [0, 2, 8], fov: 50 }}>
                 <ambientLight intensity={0.6} />
-                <directionalLight position={[10, 10, 10]} intensity={1} />
+                <directionalLight position={[10, 10, 10]} />
                 <CoachModel />
                 <OrbitControls />
               </Canvas>
