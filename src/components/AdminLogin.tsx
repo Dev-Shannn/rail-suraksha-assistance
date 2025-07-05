@@ -104,8 +104,8 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
 
         <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
           <p className="text-blue-800 text-sm font-medium mb-1">Demo Credentials:</p>
-          <p className="text-blue-700 text-xs">Username: AYUSH123</p>
-          <p className="text-blue-700 text-xs">Password: ayushhhh</p>
+          <p className="text-blue-700 text-xs">Username: Demo</p>
+          <p className="text-blue-700 text-xs">Password: Demo123</p>
         </div>
       </div>
     </div>

@@ -35,7 +35,7 @@ const AdminDashboard: React.FC = () => {
   });
 
   const handleLogin = (username: string, password: string) => {
-    if (username === 'AYUSH123' && password === 'ayushhhh') {
+    if (username === 'demo' && password === 'Demo123') {
       setIsLoggedIn(true);
       return true;
     }
@@ -246,7 +246,7 @@ const AdminDashboard: React.FC = () => {
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Username:</span>
-                    <span className="font-medium text-gray-900">AYUSH123</span>
+                    <span className="font-medium text-gray-900">Demo</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Role:</span>
