@@ -8,9 +8,27 @@ import { OrbitControls, useGLTF } from '@react-three/drei';
 
 // 3D Coach Model component
 function CoachModel() {
-  // Adjust the path if your files are in a subfolder, e.g. '/models/scene.gltf'
-  const gltf = useGLTF('/scene.gltf');
+  // Try loading the model without a leading slash
+  const gltf = useGLTF('scene.gltf');
   return <primitive object={gltf.scene} scale={2.5} />;
+}
+
+// Simple Box for debuggingno 
+
+// Minimal Canvas test at the very top for debugging
+function MinimalCanvasTest() {
+  return (
+    <div style={{ width: '400px', height: '400px', border: '4px solid blue', margin: '20px auto' }}>
+      <Canvas style={{ width: '100%', height: '100%', background: 'red' }} camera={{ position: [0, 0, 5] }}>
+        <color attach="background" args={["#ff0000"]} />
+        <ambientLight intensity={1} />
+        <mesh>
+          <boxGeometry args={[2, 2, 2]} />
+          <meshStandardMaterial color="orange" />
+        </mesh>
+      </Canvas>
+    </div>
+  );
 }
 
 const CoachTracker: React.FC = () => {
@@ -47,6 +65,8 @@ const CoachTracker: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Minimal Canvas test at the very top */}
+      <MinimalCanvasTest />
       <Header />
       
       <div className="max-w-2xl mx-auto px-4 py-8">
@@ -134,12 +154,15 @@ const CoachTracker: React.FC = () => {
 
               <div className="h-96 bg-gray-100 rounded-lg flex items-center justify-center">
                 {/* 3D Model Viewer */}
-                <Canvas camera={{ position: [0, 2, 8], fov: 50 }} style={{ width: '100%', height: '100%' }}>
-                  <ambientLight intensity={0.7} />
-                  <directionalLight position={[10, 10, 5]} intensity={1} />
-                  <CoachModel />
-                  <OrbitControls enablePan={true} enableZoom={true} enableRotate={true} />
-                </Canvas>
+                <div style={{ width: '400px', height: '400px', border: '4px solid green', background: 'red' }}>
+                  <Canvas camera={{ position: [0, 2, 8], fov: 50 }} style={{ width: '100%', height: '100%' }}>
+                    <color attach="background" args={["#ff0000"]} />
+                    <ambientLight intensity={0.7} />
+                    <directionalLight position={[10, 10, 5]} intensity={1} />
+                    <CoachModel />
+                    <OrbitControls enablePan={true} enableZoom={true} enableRotate={true} />
+                  </Canvas>
+                </div>
               </div>
 
               <button
