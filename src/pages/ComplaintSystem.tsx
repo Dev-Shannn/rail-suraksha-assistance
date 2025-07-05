@@ -1,3 +1,4 @@
+// Import dependencies and icons
 import React, { useState } from 'react';
 import Header from '../components/Header';
 import { 
@@ -16,13 +17,21 @@ import {
 } from 'lucide-react';
 
 const ComplaintSystem: React.FC = () => {
+  // State for form fields and media
   const [selectedType, setSelectedType] = useState('');
   const [complaint, setComplaint] = useState('');
   const [location, setLocation] = useState('');
   const [trainNumber, setTrainNumber] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const [hasMedia, setHasMedia] = useState(false);
+  const [mediaFile, setMediaFile] = useState<File | null>(null);
+  const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  const [audioChunks, setAudioChunks] = useState<Blob[]>([]);
+  const cameraInputRef = React.useRef<HTMLInputElement>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
+  // Complaint types for selection
   const complaintTypes = [
     {
       id: 'theft',
@@ -58,6 +67,7 @@ const ComplaintSystem: React.FC = () => {
     }
   ];
 
+  // Recent complaints for sidebar
   const recentComplaints = [
     {
       id: 'C001',
@@ -77,9 +87,10 @@ const ComplaintSystem: React.FC = () => {
     }
   ];
 
+  // Handle complaint form submission
   const handleSubmitComplaint = () => {
     if (selectedType && complaint && location) {
-      // Simulate complaint submission
+      // Simulate complaint submission (replace with API call as needed)
       console.log('Complaint submitted:', {
         type: selectedType,
         description: complaint,
@@ -87,38 +98,62 @@ const ComplaintSystem: React.FC = () => {
         trainNumber,
         hasMedia
       });
-      
-      // Reset form
+      // Reset form fields
       setSelectedType('');
       setComplaint('');
       setLocation('');
       setTrainNumber('');
       setHasMedia(false);
-      
       alert('Complaint submitted successfully! Your complaint ID is C003');
     }
   };
 
-  const startRecording = () => {
-    setIsRecording(true);
-    // Simulate recording
-    setTimeout(() => {
-      setIsRecording(false);
-      setHasMedia(true);
-    }, 3000);
+  // Start audio recording using MediaRecorder API
+  const startRecording = async () => {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      alert('Audio recording is not supported in this browser.');
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      setMediaRecorder(recorder);
+      setAudioChunks([]);
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) setAudioChunks((prev) => [...prev, e.data]);
+      };
+      recorder.onstop = () => {
+        // Create audio file from recorded chunks
+        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        const file = new File([audioBlob], `voice_note_${Date.now()}.webm`, { type: 'audio/webm' });
+        setAudioFile(file);
+        setHasMedia(true);
+      };
+      recorder.start();
+      setIsRecording(true);
+    } catch (err) {
+      alert('Could not start audio recording.');
+    }
   };
 
+  // Stop audio recording
+  const stopRecording = () => {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+      mediaRecorder.stop();
+      setIsRecording(false);
+    }
+  };
+
+  // Render the complaint system UI
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
+        {/* Page Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Complaint & Review System</h1>
           <p className="text-gray-600">Report issues and help improve railway services for everyone</p>
         </div>
-
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Complaint Form */}
           <div className="lg:col-span-2 space-y-6">
@@ -126,6 +161,7 @@ const ComplaintSystem: React.FC = () => {
             <div className="bg-white rounded-2xl shadow-lg p-6">
               <h2 className="text-xl font-bold text-gray-900 mb-6">What would you like to report?</h2>
               <div className="grid md:grid-cols-2 gap-4">
+                {/* Render complaint type buttons */}
                 {complaintTypes.map((type) => {
                   const IconComponent = type.icon;
                   return (
@@ -155,12 +191,10 @@ const ComplaintSystem: React.FC = () => {
                 })}
               </div>
             </div>
-
-            {/* Complaint Details Form */}
+            {/* Complaint Details Form (shown after type selection) */}
             {selectedType && (
               <div className="bg-white rounded-2xl shadow-lg p-6">
                 <h2 className="text-xl font-bold text-gray-900 mb-6">Complaint Details</h2>
-                
                 <div className="space-y-6">
                   {/* Location and Train Info */}
                   <div className="grid md:grid-cols-2 gap-4">
@@ -179,7 +213,6 @@ const ComplaintSystem: React.FC = () => {
                         />
                       </div>
                     </div>
-                    
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Train Number (Optional)
@@ -193,8 +226,7 @@ const ComplaintSystem: React.FC = () => {
                       />
                     </div>
                   </div>
-
-                  {/* Description */}
+                  {/* Description Field */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Describe the issue
@@ -207,54 +239,85 @@ const ComplaintSystem: React.FC = () => {
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
                     />
                   </div>
-
-                  {/* Media Upload */}
+                  {/* Media Upload Section */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Add Evidence (Optional)
                     </label>
                     <div className="grid md:grid-cols-3 gap-4">
+                      {/* Take Photo Button */}
                       <button
-                        onClick={() => setHasMedia(true)}
+                        type="button"
+                        onClick={() => cameraInputRef.current?.click()}
                         className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-gray-400 transition-colors text-center"
                       >
                         <Camera className="h-6 w-6 text-gray-400 mx-auto mb-2" />
                         <span className="text-sm text-gray-600">Take Photo</span>
                       </button>
-                      
+                      {/* Hidden file input for camera */}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                        ref={cameraInputRef}
+                        style={{ display: 'none' }}
+                        onChange={e => {
+                          if (e.target.files && e.target.files[0]) {
+                            setMediaFile(e.target.files[0]);
+                            setHasMedia(true);
+                          }
+                        }}
+                      />
+                      {/* Voice Note Button (start/stop) */}
+                      {!isRecording ? (
+                        <button
+                          type="button"
+                          onClick={startRecording}
+                          className={`p-4 border-2 border-dashed rounded-lg transition-colors text-center border-gray-300 hover:border-gray-400`}
+                        >
+                          <Mic className="h-6 w-6 mx-auto mb-2 text-gray-400" />
+                          <span className="text-sm text-gray-600">Voice Note</span>
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={stopRecording}
+                          className="p-4 border-2 border-dashed rounded-lg transition-colors text-center border-red-300 bg-red-50"
+                        >
+                          <Mic className="h-6 w-6 mx-auto mb-2 text-red-500 animate-pulse" />
+                          <span className="text-sm text-gray-600">Stop Recording...</span>
+                        </button>
+                      )}
+                      {/* Upload File Button */}
                       <button
-                        onClick={startRecording}
-                        disabled={isRecording}
-                        className={`p-4 border-2 border-dashed rounded-lg transition-colors text-center ${
-                          isRecording
-                            ? 'border-red-300 bg-red-50'
-                            : 'border-gray-300 hover:border-gray-400'
-                        }`}
-                      >
-                        <Mic className={`h-6 w-6 mx-auto mb-2 ${
-                          isRecording ? 'text-red-500 animate-pulse' : 'text-gray-400'
-                        }`} />
-                        <span className="text-sm text-gray-600">
-                          {isRecording ? 'Recording...' : 'Voice Note'}
-                        </span>
-                      </button>
-                      
-                      <button
-                        onClick={() => setHasMedia(true)}
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
                         className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-gray-400 transition-colors text-center"
                       >
                         <Upload className="h-6 w-6 text-gray-400 mx-auto mb-2" />
                         <span className="text-sm text-gray-600">Upload File</span>
                       </button>
+                      {/* Hidden file input for upload */}
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        style={{ display: 'none' }}
+                        onChange={e => {
+                          if (e.target.files && e.target.files[0]) {
+                            setMediaFile(e.target.files[0]);
+                            setHasMedia(true);
+                          }
+                        }}
+                      />
                     </div>
-                    
-                    {hasMedia && (
+                    {/* Show attached media/voice note */}
+                    {hasMedia && (mediaFile || audioFile) && (
                       <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
-                        <p className="text-sm text-green-700">Media attached successfully!</p>
+                        {mediaFile && <p className="text-sm text-green-700">Media attached: {mediaFile.name}</p>}
+                        {audioFile && <p className="text-sm text-green-700">Voice note attached: {audioFile.name}</p>}
                       </div>
                     )}
                   </div>
-
                   {/* Submit Button */}
                   <button
                     onClick={handleSubmitComplaint}
@@ -267,8 +330,7 @@ const ComplaintSystem: React.FC = () => {
               </div>
             )}
           </div>
-
-          {/* Sidebar */}
+          {/* Sidebar with recent complaints, quick actions, and guidelines */}
           <div className="space-y-6">
             {/* Recent Complaints */}
             <div className="bg-white rounded-2xl shadow-lg p-6">
@@ -295,25 +357,25 @@ const ComplaintSystem: React.FC = () => {
                 ))}
               </div>
             </div>
-
             {/* Quick Actions */}
             <div className="bg-white rounded-2xl shadow-lg p-6">
               <h2 className="text-xl font-bold text-gray-900 mb-6">Quick Actions</h2>
               <div className="space-y-3">
+                {/* Emergency Alert Button */}
                 <button className="w-full p-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-left">
                   <div className="flex items-center space-x-3">
                     <AlertTriangle className="h-5 w-5" />
                     <span className="font-medium">Emergency Alert</span>
                   </div>
                 </button>
-                
+                {/* Track Complaint Button */}
                 <button className="w-full p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-left">
                   <div className="flex items-center space-x-3">
                     <FileText className="h-5 w-5" />
                     <span className="font-medium">Track Complaint</span>
                   </div>
                 </button>
-                
+                {/* Leave Review Button */}
                 <button className="w-full p-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-left">
                   <div className="flex items-center space-x-3">
                     <Star className="h-5 w-5" />
@@ -322,11 +384,11 @@ const ComplaintSystem: React.FC = () => {
                 </button>
               </div>
             </div>
-
             {/* Complaint Guidelines */}
             <div className="bg-white rounded-2xl shadow-lg p-6">
               <h2 className="text-xl font-bold text-gray-900 mb-6">Guidelines</h2>
               <div className="space-y-3 text-sm text-gray-600">
+                {/* List of guidelines */}
                 <div className="flex items-start space-x-2">
                   <div className="w-2 h-2 bg-red-500 rounded-full mt-2 flex-shrink-0"></div>
                   <p>Provide accurate location and train details</p>
