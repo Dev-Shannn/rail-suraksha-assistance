@@ -2,10 +2,22 @@ import React from 'react';
 import { useGLTF } from '@react-three/drei';
 
 const CoachModel: React.FC = () => {
-  const gltf = useGLTF('/coach.glb');
+  try {
+    const { scene } = useGLTF('/coach.glb');
 
-  if (!gltf || !gltf.scene) {
-    console.warn('⚠️ Model not loaded or missing scene.');
+    if (!scene) {
+      console.warn('GLB loaded but no scene found.');
+      return (
+        <mesh>
+          <boxGeometry args={[2, 2, 2]} />
+          <meshStandardMaterial color="red" />
+        </mesh>
+      );
+    }
+
+    return <primitive object={scene} scale={2.5} />;
+  } catch (err) {
+    console.error('Model failed to load:', err);
     return (
       <mesh>
         <boxGeometry args={[2, 2, 2]} />
@@ -13,8 +25,6 @@ const CoachModel: React.FC = () => {
       </mesh>
     );
   }
-
-  return <primitive object={gltf.scene} scale={[2.5, 2.5, 2.5]} />;
 };
 
 useGLTF.preload('/coach.glb');
