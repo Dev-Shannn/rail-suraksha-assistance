@@ -2,6 +2,17 @@ import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import { Train, MapPin, Clock, Navigation, Wifi, Signal } from 'lucide-react';
 
+// 3D Model Viewer imports
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls, useGLTF } from '@react-three/drei';
+
+// 3D Coach Model component
+function CoachModel() {
+  // Adjust the path if your files are in a subfolder, e.g. '/models/scene.gltf'
+  const gltf = useGLTF('/scene.gltf');
+  return <primitive object={gltf.scene} scale={2.5} />;
+}
+
 const CoachTracker: React.FC = () => {
   const [trainNumber, setTrainNumber] = useState('');
   const [coachNumber, setCoachNumber] = useState('');
@@ -121,12 +132,14 @@ const CoachTracker: React.FC = () => {
                 </div>
               </div>
 
-              <div className="h-48 bg-gray-100 rounded-lg flex items-center justify-center">
-                <div className="text-center">
-                  <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-600">Live Map View</p>
-                  <p className="text-sm text-gray-500">Real-time coach position</p>
-                </div>
+              <div className="h-96 bg-gray-100 rounded-lg flex items-center justify-center">
+                {/* 3D Model Viewer */}
+                <Canvas camera={{ position: [0, 2, 8], fov: 50 }} style={{ width: '100%', height: '100%' }}>
+                  <ambientLight intensity={0.7} />
+                  <directionalLight position={[10, 10, 5]} intensity={1} />
+                  <CoachModel />
+                  <OrbitControls enablePan={true} enableZoom={true} enableRotate={true} />
+                </Canvas>
               </div>
 
               <button
